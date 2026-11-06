@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Crm.Api/Crm.Api.csproj" />
+    <Project Path="src/Crm.Modules.Customers.Application/Crm.Modules.Customers.Application.csproj" />
+    <Project Path="src/Crm.Modules.Customers.Domain/Crm.Modules.Customers.Domain.csproj" />
+    <Project Path="src/Crm.Modules.Customers.Infrastructure/Crm.Modules.Customers.Infrastructure.csproj" />
+    <Project Path="src/Crm.Shared/Crm.Shared.csproj" />
+  </Folder>
+</Solution>
