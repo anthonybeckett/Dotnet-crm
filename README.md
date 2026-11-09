@@ -153,4 +153,58 @@ Run any dotnet commands in the `api` directory and any node commands in the `ui`
 | Install frontend dependencies | `npm install` |
 | Run frontend | `npm start` |
 
+## 7. Database Migrations
+
+This project uses Entity Framework Core migrations to manage PostgreSQL database schema changes.
+
+Migrations are managed separately by each module through its own DbContext.
+
+Run all commands from the solution root. Replace `Module` with the module name e.g `Customers`
+
+Create a migration:
+
+```bash
+dotnet ef migrations add MigrationName \
+  --project src/Crm.Modules.Module.Infrastructure \
+  --startup-project src/Crm.Api \
+  --context ModuleDbContext \
+  --output-dir Persistence/Migrations
+```
+
+Apply migrations:
+
+```bash
+dotnet ef database update \
+  --project src/Crm.Modules.Module.Infrastructure \
+  --startup-project src/Crm.Api \
+  --context ModuleDbContext
+```
+
+List migrations:
+
+```bash
+dotnet ef migrations list \
+  --project src/Crm.Modules.Module.Infrastructure \
+  --startup-project src/Crm.Api \
+  --context ModuleDbContext
+```
+
+Generate SQL script:
+
+```bash
+dotnet ef migrations script \
+  --project src/Crm.Modules.Module.Infrastructure \
+  --startup-project src/Crm.Api \
+  --context ModuleDbContext \
+  --output migrations.sql
+```
+
+Roll back migrations:
+
+```bash
+dotnet ef database update PreviousMigrationName \
+  --project src/Crm.Modules.Module.Infrastructure \
+  --startup-project src/Crm.Api \
+  --context ModuleDbContext
+```
 ---
