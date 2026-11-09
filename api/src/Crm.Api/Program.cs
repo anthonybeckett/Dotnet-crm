@@ -1,9 +1,12 @@
 using Crm.Modules.Customers.Application;
+using Crm.Modules.Customers.Infrastructure;
 using Wolverine;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddCustomersInfrastructure(builder.Configuration);
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
