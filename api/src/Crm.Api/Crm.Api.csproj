@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.14" />
     <PackageReference Include="WolverineFx" Version="6.64.0" />
     <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="6.64.0" />
+    <PackageReference Include="WolverineFx.FluentValidation" Version="6.64.0" />
     <PackageReference Include="WolverineFx.Postgresql" Version="6.64.0" />
     <PackageReference Include="WolverineFx.RuntimeCompilation" Version="6.64.0" />
   </ItemGroup>

@@ -1,10 +1,11 @@
+using Crm.Modules.Customers.Application.Abstractions.Persistence;
 using Crm.Modules.Customers.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Crm.Modules.Customers.Infrastructure.Persistence;
 
 public class CustomersDbContext(DbContextOptions<CustomersDbContext> options)
-    : DbContext(options)
+    : DbContext(options), ICustomerRepository
 {
     public DbSet<Customer> Customers => Set<Customer>();
 
@@ -15,5 +16,10 @@ public class CustomersDbContext(DbContextOptions<CustomersDbContext> options)
         modelBuilder.HasDefaultSchema("customers");
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CustomersDbContext).Assembly);
+    }
+
+    public void Add(Customer customer)
+    {
+        Customers.Add(customer);
     }
 }
