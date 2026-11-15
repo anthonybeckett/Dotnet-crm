@@ -1,5 +1,6 @@
 using Crm.Modules.Customers.Application.Abstractions.Persistence;
 using Crm.Modules.Customers.Infrastructure.Persistence;
+using Crm.Modules.Customers.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,8 +21,8 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString);
         });
 
-        services.AddScoped<ICustomerRepository>(serviceProvider =>
-            serviceProvider.GetRequiredService<CustomersDbContext>());
+        services.AddScoped<ICustomerRepository>(serviceProvider => serviceProvider.GetRequiredService<CustomersDbContext>());
+        services.AddScoped<ICustomerReadRepository, CustomerReadRepository>();
 
         return services;
     }
