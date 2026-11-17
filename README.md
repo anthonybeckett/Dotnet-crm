@@ -327,27 +327,3 @@ dotnet test --filter "FullyQualifiedName~GetCustomer"
 ```
 
 This is useful when working on a particular feature and you don't need to execute the entire test suite after every small change.
-
-### 8.7 Running tests in Rider
-
-The test projects can also be executed directly through JetBrains Rider.
-
-1. Open the solution in Rider.
-2. Locate the test project in the Solution Explorer.
-3. Open a test class.
-4. Use the green run icon next to an individual test or test class.
-5. Alternatively, open the Unit Tests window to run the complete test suite.
-
-The API integration tests use the same User Secrets configuration regardless of whether they are started from Rider or the terminal. You do not need to configure a separate environment variable for Rider.
-
-### 8.8 Testing principles
-
-A few principles should be followed as the project grows:
-
-- **Domain tests:** Test business rules without requiring a database or external services.
-- **Application tests:** Test handlers and validation independently using mocked or substituted dependencies where appropriate.
-- **Integration tests:** Test real interactions between the API, application, infrastructure and PostgreSQL.
-- **Database isolation:** Always use the dedicated test database for integration tests.
-- **Regression testing:** Run the complete test suite before committing significant changes.
-
-The aim is to catch problems as early as possible while keeping the test suite straightforward to maintain.
