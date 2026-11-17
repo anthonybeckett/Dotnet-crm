@@ -6,4 +6,9 @@
     <Project Path="src/Crm.Modules.Customers.Infrastructure/Crm.Modules.Customers.Infrastructure.csproj" />
     <Project Path="src/Crm.Shared/Crm.Shared.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Crm.Api.Tests/Crm.Api.Tests.csproj" />
+    <Project Path="tests/Crm.Modules.Customers.Application.Tests/Crm.Modules.Customers.Application.Tests.csproj" />
+    <Project Path="tests/Crm.Modules.Customers.Domain.Tests/Crm.Modules.Customers.Domain.Tests.csproj" />
+  </Folder>
 </Solution>

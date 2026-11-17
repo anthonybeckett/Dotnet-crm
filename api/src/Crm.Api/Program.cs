@@ -1,4 +1,5 @@
 using Crm.Api.Endpoints.Customers;
+using Crm.Api.Exceptions;
 using Crm.Modules.Customers.Application;
 using Crm.Modules.Customers.Application.Abstractions.Persistence;
 using Crm.Modules.Customers.Infrastructure;
@@ -9,6 +10,9 @@ using Wolverine.FluentValidation;
 using Wolverine.Postgresql;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 // Add services to the container.
 builder.Services.AddCustomersInfrastructure(builder.Configuration);
@@ -34,6 +38,8 @@ builder.Host.UseWolverine(options =>
 });
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Register endpoints
 app.MapCustomerEndpoints();
