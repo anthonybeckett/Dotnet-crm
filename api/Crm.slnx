@@ -1,10 +1,13 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Crm.Api/Crm.Api.csproj" />
-    <Project Path="src/Crm.Modules.Customers.Application/Crm.Modules.Customers.Application.csproj" />
-    <Project Path="src/Crm.Modules.Customers.Domain/Crm.Modules.Customers.Domain.csproj" />
-    <Project Path="src/Crm.Modules.Customers.Infrastructure/Crm.Modules.Customers.Infrastructure.csproj" />
     <Project Path="src/Crm.Shared/Crm.Shared.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Customers/">
+    <Project Path="src/Modules/Customers/Application/Crm.Modules.Customers.Application.csproj" />
+    <Project Path="src/Modules/Customers/Domain/Crm.Modules.Customers.Domain.csproj" />
+    <Project Path="src/Modules/Customers/Infrastructure/Crm.Modules.Customers.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Crm.Api.Tests/Crm.Api.Tests.csproj" />

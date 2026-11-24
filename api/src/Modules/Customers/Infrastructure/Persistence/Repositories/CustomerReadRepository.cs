@@ -1,7 +1,10 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Crm.Modules.Customers.Application.Abstractions.Persistence;
 using Crm.Modules.Customers.Domain.Entities;
 using Crm.Shared.Pagination;
-using JasperFx.Events.Documents;
 using Microsoft.EntityFrameworkCore;
 
 namespace Crm.Modules.Customers.Infrastructure.Persistence.Repositories;
@@ -10,9 +13,7 @@ public class CustomerReadRepository(CustomersDbContext dbContext) : ICustomerRea
 {
     public async Task<Customer?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
-            dbContext.Customers.AsNoTracking(),
-            customer => customer.Id == id,
+        return await dbContext.Customers.AsNoTracking().FirstOrDefaultAsync(customer => customer.Id == id,
             cancellationToken);
     }
 
@@ -22,11 +23,9 @@ public class CustomerReadRepository(CustomersDbContext dbContext) : ICustomerRea
             .AsNoTracking()
             .OrderBy(customer => customer.Name);
 
-        var totalCount = await EntityFrameworkQueryableExtensions.CountAsync(query, cancellationToken);
+        var totalCount = await query.CountAsync(cancellationToken);
 
-        var customers = await EntityFrameworkQueryableExtensions.ToListAsync(
-            query.Skip((page - 1) * pageSize).Take(pageSize),
-            cancellationToken);
+        var customers = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
         return new PagedResult<Customer>(customers, page, pageSize, totalCount);
     }

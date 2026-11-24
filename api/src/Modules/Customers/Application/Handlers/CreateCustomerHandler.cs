@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Crm.Modules.Customers.Application.Abstractions.Persistence;
 using Crm.Modules.Customers.Application.Commands;
 using Crm.Modules.Customers.Domain.Entities;

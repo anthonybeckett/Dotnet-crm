@@ -1,3 +1,4 @@
+using System;
 using Crm.Modules.Customers.Application.Abstractions.Persistence;
 using Crm.Modules.Customers.Infrastructure.Persistence;
 using Crm.Modules.Customers.Infrastructure.Persistence.Repositories;

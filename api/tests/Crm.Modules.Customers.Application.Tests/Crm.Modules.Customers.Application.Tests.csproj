@@ -20,8 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Crm.Modules.Customers.Application\Crm.Modules.Customers.Application.csproj" />
-    <ProjectReference Include="..\..\src\Crm.Modules.Customers.Domain\Crm.Modules.Customers.Domain.csproj" />
+    	<ProjectReference Include="../../src/Modules/Customers/Application/Crm.Modules.Customers.Application.csproj" />
+	<ProjectReference Include="../../src/Modules/Customers/Domain/Crm.Modules.Customers.Domain.csproj" />
   </ItemGroup>
 
 </Project>

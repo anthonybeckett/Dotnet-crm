@@ -1,3 +1,4 @@
+using System;
 using Crm.Modules.Customers.Domain.Enums;
 
 namespace Crm.Modules.Customers.Domain.Entities;
