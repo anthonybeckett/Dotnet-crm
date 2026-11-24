@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,11 @@ public class UpdateCustomerHandler(ICustomerRepository customerRepository)
         if (customer is null)
         {
             throw new KeyNotFoundException($"Customer with ID '{command.Id}' was not found.");
+        }
+        
+        if (customer.IsArchived)
+        {
+            throw new InvalidOperationException("Archived customers cannot be updated.");
         }
 
         customer.Update(command.CustomerType, command.Name, command.Email, command.PhoneNumber);

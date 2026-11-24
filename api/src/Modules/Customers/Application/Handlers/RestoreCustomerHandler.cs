@@ -1,0 +1,28 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Crm.Modules.Customers.Application.Abstractions.Persistence;
+using Crm.Modules.Customers.Application.Commands;
+
+namespace Crm.Modules.Customers.Application.Handlers;
+
+public class RestoreCustomerHandler(ICustomerRepository customerRepository)
+{
+    public async Task Handle(RestoreCustomerCommand command, CancellationToken cancellationToken)
+    {
+        var customer = await customerRepository.GetByIdAsync(command.Id, cancellationToken);
+
+        if (customer is null)
+        {
+            throw new KeyNotFoundException($"Customer with ID '{command.Id}' was not found.");
+        }
+
+        if (!customer.IsArchived)
+        {
+            throw new InvalidOperationException("Customer is not archived.");
+        }
+
+        customer.Restore();
+    }
+}

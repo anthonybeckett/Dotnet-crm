@@ -48,15 +48,16 @@ public static class CustomerEndpoints
                 customer.Name,
                 customer.Email,
                 customer.PhoneNumber,
-                customer.CreatedAtUtc);
+                customer.CreatedAtUtc,
+                customer.IsArchived);
 
             return Results.Ok(response);
         }).WithName("GetCustomerById");
 
         group.MapGet("/",
-            async (int? page, int? pageSize, IMessageBus messageBus, CancellationToken cancellationToken) =>
+            async (int? page, int? pageSize, bool? includeArchived, IMessageBus messageBus, CancellationToken cancellationToken) =>
             {
-                var query = new GetCustomersQuery(page ?? 1, pageSize ?? 20);
+                var query = new GetCustomersQuery(page ?? 1, pageSize ?? 20, includeArchived ?? false);
 
                 var result = await messageBus.InvokeAsync<PagedResult<Customer>>(query, cancellationToken);
 
@@ -67,7 +68,8 @@ public static class CustomerEndpoints
                         customer.Name,
                         customer.Email,
                         customer.PhoneNumber,
-                        customer.CreatedAtUtc)).ToList(),
+                        customer.CreatedAtUtc,
+                        customer.IsArchived)).ToList(),
                     result.Page,
                     result.PageSize,
                     result.TotalCount);
@@ -94,6 +96,20 @@ public static class CustomerEndpoints
 
                 return Results.NoContent();
             });
+
+        group.MapDelete("/{id:guid}", async (Guid id, IMessageBus messageBus, CancellationToken cancellationToken) =>
+        {
+            await messageBus.InvokeAsync(new ArchiveCustomerCommand(id), cancellationToken);
+
+            return Results.NoContent();
+        });
+        
+        group.MapPost("/{id:guid}/restore", async (Guid id, IMessageBus messageBus, CancellationToken cancellationToken) =>
+        {
+            await messageBus.InvokeAsync(new RestoreCustomerCommand(id), cancellationToken);
+
+            return Results.NoContent();
+        });
 
         return endpoints;
     }

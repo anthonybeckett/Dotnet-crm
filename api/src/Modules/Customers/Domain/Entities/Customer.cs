@@ -21,6 +21,8 @@ public class Customer
     public string? PhoneNumber { get; private set; }
 
     public DateTimeOffset CreatedAtUtc { get; private set; }
+    
+    public bool IsArchived { get; private set; }
 
     public static Customer Create(
         CustomerType customerType,
@@ -78,5 +80,15 @@ public class Customer
         Name = name.Trim();
         Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
         PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber.Trim();
+    }
+    
+    public void Archive()
+    {
+        IsArchived = true;
+    }
+    
+    public void Restore()
+    {
+        IsArchived = false;
     }
 }

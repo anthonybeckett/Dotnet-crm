@@ -9,11 +9,12 @@ namespace Crm.Modules.Customers.Application.Handlers;
 
 public class GetCustomersHandler(ICustomerReadRepository customerReadRepository)
 {
-    public Task<PagedResult<Customer>> Handle(GetCustomersQuery query, CancellationToken cancellationToken)
+    public async Task<PagedResult<Customer>> Handle(GetCustomersQuery query, CancellationToken cancellationToken)
     {
-        return customerReadRepository.GetPagedAsync(
+        return await customerReadRepository.GetPagedAsync(
             query.Page,
             query.PageSize,
+            query.IncludeArchived,
             cancellationToken);
     }
 }

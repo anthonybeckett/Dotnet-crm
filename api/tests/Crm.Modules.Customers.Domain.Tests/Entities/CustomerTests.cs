@@ -160,4 +160,53 @@ public class CustomerTests
         // Act & Assert
         Assert.Throws<ArgumentOutOfRangeException>(() => customer.Update((CustomerType)99, "John Smith"));
     }
+    
+    [Fact]
+    public void Archive_SetsIsArchivedToTrue()
+    {
+        // Arrange
+        var customer = Customer.Create(CustomerType.Individual, "John Smith");
+
+        // Act
+        customer.Archive();
+
+        // Assert
+        Assert.True(customer.IsArchived);
+    }
+    
+    [Fact]
+    public void Create_WithValidDetails_SetsIsArchivedToFalse()
+    {
+        var customer = Customer.Create(CustomerType.Individual, "John Smith");
+
+        Assert.False(customer.IsArchived);
+    }
+    
+    [Fact]
+    public void Restore_WithArchivedCustomer_SetsIsArchivedToFalse()
+    {
+        // Arrange
+        var customer = Customer.Create(CustomerType.Individual, "John Smith");
+
+        customer.Archive();
+
+        // Act
+        customer.Restore();
+
+        // Assert
+        Assert.False(customer.IsArchived);
+    }
+
+    [Fact]
+    public void Restore_WithActiveCustomer_LeavesIsArchivedFalse()
+    {
+        // Arrange
+        var customer = Customer.Create(CustomerType.Individual, "John Smith");
+
+        // Act
+        customer.Restore();
+
+        // Assert
+        Assert.False(customer.IsArchived);
+    }
 }

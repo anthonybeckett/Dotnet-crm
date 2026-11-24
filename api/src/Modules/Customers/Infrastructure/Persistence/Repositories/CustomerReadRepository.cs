@@ -13,19 +13,33 @@ public class CustomerReadRepository(CustomersDbContext dbContext) : ICustomerRea
 {
     public async Task<Customer?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await dbContext.Customers.AsNoTracking().FirstOrDefaultAsync(customer => customer.Id == id,
-            cancellationToken);
+        return await dbContext
+            .Customers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(customer => customer.Id == id, cancellationToken);
     }
 
-    public async Task<PagedResult<Customer>> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken)
+    public async Task<PagedResult<Customer>> GetPagedAsync(
+        int page,
+        int pageSize,
+        bool includeArchived,
+        CancellationToken cancellationToken)
     {
-        var query = dbContext.Customers
-            .AsNoTracking()
-            .OrderBy(customer => customer.Name);
+        var query = dbContext.Customers.AsNoTracking();
+
+        if (!includeArchived)
+        {
+            query = query.Where(customer => !customer.IsArchived);
+        }
+
+        query = query.OrderBy(customer => customer.Name);
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var customers = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        var customers = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
 
         return new PagedResult<Customer>(customers, page, pageSize, totalCount);
     }

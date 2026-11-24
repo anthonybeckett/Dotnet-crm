@@ -1,3 +1,3 @@
 namespace Crm.Modules.Customers.Application.Queries;
 
-public record GetCustomersQuery(int Page, int PageSize);
+public record GetCustomersQuery(int Page, int PageSize, bool IncludeArchived = false);

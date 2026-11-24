@@ -41,7 +41,11 @@ public class GetCustomersHandlerTests
 
         var query = new GetCustomersQuery(page, pageSize);
 
-        _repositoryMock.Setup(repository => repository.GetPagedAsync(page, pageSize, It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(repository => repository.GetPagedAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(pagedResult);
 
         // Act
@@ -55,7 +59,42 @@ public class GetCustomersHandlerTests
         Assert.Equal("John Smith", result.Items[0].Name);
         Assert.Equal("Acme Limited", result.Items[1].Name);
 
-        _repositoryMock.Verify(repository => repository.GetPagedAsync(page, pageSize, It.IsAny<CancellationToken>()),
+        _repositoryMock.Verify(repository => repository.GetPagedAsync(
+                page,
+                pageSize,
+                query.IncludeArchived,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+    
+    [Fact]
+    public async Task Handle_WithIncludeArchivedTrue_PassesIncludeArchivedToRepository()
+    {
+        // Arrange
+        const int page = 1;
+        const int pageSize = 10;
+
+        var query = new GetCustomersQuery(page, pageSize, IncludeArchived: true);
+
+        var pagedResult = new PagedResult<Customer>(new List<Customer>(), page, pageSize, 0);
+
+        _repositoryMock
+            .Setup(repository => repository.GetPagedAsync(
+                page,
+                pageSize,
+                true,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(pagedResult);
+
+        // Act
+        await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        _repositoryMock.Verify(repository => repository.GetPagedAsync(
+                page,
+                pageSize,
+                true,
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 }

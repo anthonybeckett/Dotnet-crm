@@ -8,4 +8,5 @@ public record CustomerResponse(
     string Name,
     string? Email,
     string? PhoneNumber,
-    DateTimeOffset CreatedAtUtc);
+    DateTimeOffset CreatedAtUtc,
+    bool IsArchived);

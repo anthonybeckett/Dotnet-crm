@@ -56,6 +56,27 @@ public class GlobalExceptionHandler(IProblemDetailsService problemDetailsService
 
             return true;
         }
+        
+        if (exception is InvalidOperationException)
+        {
+            var problemDetails = new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Operation conflict.",
+                Detail = exception.Message,
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10"
+            };
+
+            httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+
+            await problemDetailsService.WriteAsync(new ProblemDetailsContext
+            {
+                HttpContext = httpContext,
+                ProblemDetails = problemDetails
+            });
+
+            return true;
+        }
 
         return false;
     }

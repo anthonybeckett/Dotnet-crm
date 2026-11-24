@@ -10,5 +10,5 @@ public interface ICustomerReadRepository
 {
     Task<Customer?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 
-    Task<PagedResult<Customer>> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken);
+    Task<PagedResult<Customer>> GetPagedAsync(int page, int pageSize, bool includeArchived, CancellationToken cancellationToken);
 }

@@ -37,7 +37,7 @@ public class CustomerEndpointTests(CrmApiFactory factory) : IClassFixture<CrmApi
         var getResponse = await _client.GetAsync($"/api/customers/{createdCustomer.Id}");
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
-        
+
         var customer = await getResponse.Content
             .ReadFromJsonAsync<CustomerResponse>();
 
@@ -47,7 +47,7 @@ public class CustomerEndpointTests(CrmApiFactory factory) : IClassFixture<CrmApi
         Assert.Equal("07700900123", customer.PhoneNumber);
         Assert.Equal(1, (int)customer.CustomerType);
     }
-    
+
     [Fact]
     public async Task GetCustomers_ReturnsPagedResult()
     {
@@ -65,7 +65,7 @@ public class CustomerEndpointTests(CrmApiFactory factory) : IClassFixture<CrmApi
         Assert.True(result.TotalCount > 0);
         Assert.NotEmpty(result.Items);
     }
-    
+
     [Fact]
     public async Task CreateCustomer_WithInvalidRequest_ReturnsBadRequest()
     {
@@ -84,7 +84,7 @@ public class CustomerEndpointTests(CrmApiFactory factory) : IClassFixture<CrmApi
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
-    
+
     [Fact]
     public async Task GetCustomerById_WithUnknownId_ReturnsNotFound()
     {
@@ -97,7 +97,7 @@ public class CustomerEndpointTests(CrmApiFactory factory) : IClassFixture<CrmApi
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-    
+
     [Fact]
     public async Task UpdateCustomer_WithValidDetails_ReturnsNoContent()
     {
@@ -138,7 +138,7 @@ public class CustomerEndpointTests(CrmApiFactory factory) : IClassFixture<CrmApi
         Assert.Equal("john.updated@example.com", updatedCustomer.Email);
         Assert.Equal("0987654321", updatedCustomer.PhoneNumber);
     }
-    
+
     [Fact]
     public async Task UpdateCustomer_WithUnknownId_ReturnsNotFound()
     {
@@ -153,6 +153,281 @@ public class CustomerEndpointTests(CrmApiFactory factory) : IClassFixture<CrmApi
 
         // Act
         var response = await _client.PutAsJsonAsync($"/api/customers/{customerId}", updateRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ArchiveCustomer_WithExistingId_ReturnsNoContent()
+    {
+        // Arrange
+        var createRequest = new CreateCustomerRequest(
+            CustomerType.Individual,
+            "Archive Test Customer",
+            "archive@example.com",
+            "0123456789");
+
+        var createResponse = await _client.PostAsJsonAsync("/api/customers/", createRequest);
+
+        createResponse.EnsureSuccessStatusCode();
+
+        var createdCustomer = await createResponse.Content.ReadFromJsonAsync<CustomerCreatedResponse>();
+
+        // Act
+        var archiveResponse = await _client.DeleteAsync($"/api/customers/{createdCustomer!.Id}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, archiveResponse.StatusCode);
+
+        var getResponse = await _client.GetAsync($"/api/customers/{createdCustomer.Id}");
+
+        getResponse.EnsureSuccessStatusCode();
+
+        var archivedCustomer = await getResponse.Content.ReadFromJsonAsync<CustomerResponse>();
+
+        Assert.NotNull(archivedCustomer);
+        Assert.True(archivedCustomer.IsArchived);
+    }
+
+    [Fact]
+    public async Task ArchiveCustomer_WithUnknownId_ReturnsNotFound()
+    {
+        // Arrange
+        var customerId = Guid.NewGuid();
+
+        // Act
+        var response = await _client.DeleteAsync(
+            $"/api/customers/{customerId}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetCustomers_AfterArchivingCustomer_ExcludesArchivedCustomer()
+    {
+        // Arrange
+        var createRequest = new CreateCustomerRequest(
+            CustomerType.Individual,
+            "Customer To Archive",
+            "archive-list@example.com",
+            "0123456789");
+
+        var createResponse = await _client.PostAsJsonAsync("/api/customers/", createRequest);
+
+        createResponse.EnsureSuccessStatusCode();
+
+        var createdCustomer = await createResponse.Content.ReadFromJsonAsync<CustomerCreatedResponse>();
+
+        await _client.DeleteAsync($"/api/customers/{createdCustomer!.Id}");
+
+        // Act
+        var response = await _client.GetAsync("/api/customers/?page=1&pageSize=100");
+
+        response.EnsureSuccessStatusCode();
+
+        var customers = await response.Content.ReadFromJsonAsync<PagedResult<CustomerResponse>>();
+
+        // Assert
+        Assert.NotNull(customers);
+        Assert.DoesNotContain(customers.Items, customer => customer.Id == createdCustomer.Id);
+    }
+
+    [Fact]
+    public async Task UpdateCustomer_WithArchivedCustomer_ReturnsConflict()
+    {
+        // Arrange
+        var createRequest = new CreateCustomerRequest(
+            CustomerType.Individual,
+            "Archived Customer",
+            "archived@example.com",
+            "0123456789");
+
+        var createResponse = await _client.PostAsJsonAsync("/api/customers/", createRequest);
+
+        createResponse.EnsureSuccessStatusCode();
+
+        var createdCustomer = await createResponse.Content.ReadFromJsonAsync<CustomerCreatedResponse>();
+
+        await _client.DeleteAsync($"/api/customers/{createdCustomer!.Id}");
+
+        var updateRequest = new UpdateCustomerRequest(
+            CustomerType.Individual,
+            "Updated Archived Customer",
+            "updated@example.com",
+            "0987654321");
+
+        // Act
+        var response = await _client.PutAsJsonAsync($"/api/customers/{createdCustomer.Id}", updateRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task ArchiveCustomer_WithAlreadyArchivedCustomer_ReturnsConflict()
+    {
+        // Arrange
+        var createRequest = new CreateCustomerRequest(
+            CustomerType.Individual,
+            "Already Archived Customer",
+            "already.archived@example.com",
+            "0123456789");
+
+        var createResponse = await _client.PostAsJsonAsync("/api/customers/", createRequest);
+
+        createResponse.EnsureSuccessStatusCode();
+
+        var createdCustomer = await createResponse.Content.ReadFromJsonAsync<CustomerCreatedResponse>();
+
+        // First archive should succeed
+        var firstArchiveResponse = await _client.DeleteAsync($"/api/customers/{createdCustomer!.Id}");
+
+        Assert.Equal(HttpStatusCode.NoContent, firstArchiveResponse.StatusCode);
+
+        // Act – attempt to archive again
+        var secondArchiveResponse = await _client.DeleteAsync($"/api/customers/{createdCustomer.Id}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Conflict, secondArchiveResponse.StatusCode);
+    }
+    
+    [Fact]
+    public async Task GetCustomers_WithIncludeArchivedTrue_IncludesArchivedCustomer()
+    {
+        // Arrange
+        var createRequest = new CreateCustomerRequest(
+            CustomerType.Individual,
+            "Archived Customer Included",
+            "archived.included@example.com",
+            "0123456789");
+
+        var createResponse = await _client.PostAsJsonAsync("/api/customers/", createRequest);
+
+        createResponse.EnsureSuccessStatusCode();
+
+        var createdCustomer = await createResponse.Content.ReadFromJsonAsync<CustomerCreatedResponse>();
+
+        var archiveResponse = await _client.DeleteAsync($"/api/customers/{createdCustomer!.Id}");
+
+        Assert.Equal(HttpStatusCode.NoContent, archiveResponse.StatusCode);
+
+        // Act
+        var response = await _client.GetAsync("/api/customers/?page=1&pageSize=100&includeArchived=true");
+
+        response.EnsureSuccessStatusCode();
+
+        var customers = await response.Content.ReadFromJsonAsync<PagedResult<CustomerResponse>>();
+
+        // Assert
+        Assert.NotNull(customers);
+
+        var archivedCustomer = Assert.Single(customers.Items, customer => customer.Id == createdCustomer.Id);
+
+        Assert.True(archivedCustomer.IsArchived);
+    }
+    
+    [Fact]
+    public async Task GetCustomers_WithIncludeArchivedFalse_ExcludesArchivedCustomer()
+    {
+        // Arrange
+        var createRequest = new CreateCustomerRequest(
+            CustomerType.Individual,
+            "Archived Customer Excluded",
+            "archived.excluded@example.com",
+            "0123456789");
+
+        var createResponse = await _client.PostAsJsonAsync("/api/customers/", createRequest);
+
+        createResponse.EnsureSuccessStatusCode();
+
+        var createdCustomer = await createResponse.Content.ReadFromJsonAsync<CustomerCreatedResponse>();
+
+        var archiveResponse = await _client.DeleteAsync($"/api/customers/{createdCustomer!.Id}");
+
+        Assert.Equal(HttpStatusCode.NoContent, archiveResponse.StatusCode);
+
+        // Act
+        var response = await _client.GetAsync("/api/customers/?page=1&pageSize=100&includeArchived=false");
+
+        response.EnsureSuccessStatusCode();
+
+        var customers = await response.Content.ReadFromJsonAsync<PagedResult<CustomerResponse>>();
+
+        // Assert
+        Assert.NotNull(customers);
+
+        Assert.DoesNotContain(customers.Items, customer => customer.Id == createdCustomer.Id);
+    }
+    
+    [Fact]
+    public async Task RestoreCustomer_WithArchivedCustomer_ReturnsNoContent()
+    {
+        // Arrange
+        var createRequest = new CreateCustomerRequest(
+            CustomerType.Individual,
+            "Customer To Restore",
+            "restore@example.com",
+            "0123456789");
+
+        var createResponse = await _client.PostAsJsonAsync("/api/customers/",createRequest);
+
+        createResponse.EnsureSuccessStatusCode();
+
+        var createdCustomer = await createResponse.Content.ReadFromJsonAsync<CustomerCreatedResponse>();
+
+        var archiveResponse = await _client.DeleteAsync($"/api/customers/{createdCustomer!.Id}");
+
+        Assert.Equal(HttpStatusCode.NoContent, archiveResponse.StatusCode);
+
+        // Act
+        var restoreResponse = await _client.PostAsync($"/api/customers/{createdCustomer.Id}/restore", null);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, restoreResponse.StatusCode);
+
+        var getResponse = await _client.GetAsync($"/api/customers/{createdCustomer.Id}");
+
+        getResponse.EnsureSuccessStatusCode();
+
+        var restoredCustomer = await getResponse.Content.ReadFromJsonAsync<CustomerResponse>();
+
+        Assert.NotNull(restoredCustomer);
+        Assert.False(restoredCustomer.IsArchived);
+    }
+    
+    [Fact]
+    public async Task RestoreCustomer_WithActiveCustomer_ReturnsConflict()
+    {
+        // Arrange
+        var createRequest = new CreateCustomerRequest(
+            CustomerType.Individual,
+            "Active Customer",
+            "active@example.com",
+            "0123456789");
+
+        var createResponse = await _client.PostAsJsonAsync("/api/customers/", createRequest);
+
+        createResponse.EnsureSuccessStatusCode();
+
+        var createdCustomer = await createResponse.Content.ReadFromJsonAsync<CustomerCreatedResponse>();
+
+        // Act
+        var response = await _client.PostAsync($"/api/customers/{createdCustomer!.Id}/restore", null);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task RestoreCustomer_WithUnknownId_ReturnsNotFound()
+    {
+        // Arrange
+        var customerId = Guid.CreateVersion7();
+
+        // Act
+        var response = await _client.PostAsync($"/api/customers/{customerId}/restore", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
