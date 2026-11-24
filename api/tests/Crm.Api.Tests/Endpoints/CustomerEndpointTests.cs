@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Crm.Api.Tests.Infrastructure;
 using Crm.Api.Contracts.Customers;
+using Crm.Modules.Customers.Domain.Enums;
 using Crm.Shared.Pagination;
 
 namespace Crm.Api.Tests.Endpoints;
@@ -92,6 +93,66 @@ public class CustomerEndpointTests(CrmApiFactory factory) : IClassFixture<CrmApi
 
         // Act
         var response = await _client.GetAsync($"/api/customers/{unknownId}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task UpdateCustomer_WithValidDetails_ReturnsNoContent()
+    {
+        // Arrange
+        var createRequest = new CreateCustomerRequest(
+            CustomerType.Individual,
+            "John Smith",
+            "john.smith@example.com",
+            "0123456789");
+
+        var createResponse = await _client.PostAsJsonAsync("/api/customers/", createRequest);
+
+        createResponse.EnsureSuccessStatusCode();
+
+        var createdCustomer = await createResponse.Content.ReadFromJsonAsync<CustomerCreatedResponse>();
+
+        var updateRequest = new UpdateCustomerRequest(
+            CustomerType.Organisation,
+            "John Smith Updated",
+            "john.updated@example.com",
+            "0987654321");
+
+        // Act
+        var updateResponse = await _client.PutAsJsonAsync($"/api/customers/{createdCustomer!.Id}", updateRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, updateResponse.StatusCode);
+
+        var getResponse = await _client.GetAsync($"/api/customers/{createdCustomer.Id}");
+
+        getResponse.EnsureSuccessStatusCode();
+
+        var updatedCustomer = await getResponse.Content.ReadFromJsonAsync<CustomerResponse>();
+
+        Assert.NotNull(updatedCustomer);
+        Assert.Equal("John Smith Updated", updatedCustomer.Name);
+        Assert.Equal(CustomerType.Organisation, updatedCustomer.CustomerType);
+        Assert.Equal("john.updated@example.com", updatedCustomer.Email);
+        Assert.Equal("0987654321", updatedCustomer.PhoneNumber);
+    }
+    
+    [Fact]
+    public async Task UpdateCustomer_WithUnknownId_ReturnsNotFound()
+    {
+        // Arrange
+        var customerId = Guid.NewGuid();
+
+        var updateRequest = new UpdateCustomerRequest(
+            CustomerType.Individual,
+            "John Smith",
+            "john.smith@example.com",
+            "0123456789");
+
+        // Act
+        var response = await _client.PutAsJsonAsync($"/api/customers/{customerId}", updateRequest);
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);

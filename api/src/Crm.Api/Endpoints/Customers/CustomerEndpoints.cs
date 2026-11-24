@@ -75,6 +75,26 @@ public static class CustomerEndpoints
                 return Results.Ok(response);
             }).WithName("GetCustomers");
 
+        group.MapPut(
+            "/{id:guid}",
+            async (
+                Guid id,
+                UpdateCustomerRequest request,
+                IMessageBus messageBus,
+                CancellationToken cancellationToken) =>
+            {
+                var command = new UpdateCustomerCommand(
+                    id,
+                    request.CustomerType,
+                    request.Name,
+                    request.Email,
+                    request.PhoneNumber);
+
+                await messageBus.InvokeAsync(command, cancellationToken);
+
+                return Results.NoContent();
+            });
+
         return endpoints;
     }
 }

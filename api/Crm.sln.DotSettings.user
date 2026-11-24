@@ -8,6 +8,7 @@
     &lt;TestId&gt;xUnit::6B4CBD64-5642-019F-BE9A-32D4CA7BBD9B::net10.0::Crm.Modules.Customers.Application.Tests.Handlers.GetCustomersHandlerTests&lt;/TestId&gt;
     &lt;TestId&gt;xUnit::6B4CBD64-5642-019F-BE9A-32D4CA7BBD9B::net10.0::Crm.Modules.Customers.Application.Tests.Validators.GetCustomersQueryValidatorTests&lt;/TestId&gt;
     &lt;TestId&gt;xUnit::BBBA7F4D-BCD8-13E8-B364-56EA6747E51D::net10.0::Crm.Api.Tests.Endpoints.CustomerEndpointTests&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::6B4CBD64-5642-019F-BE9A-32D4CA7BBD9B::net10.0::Crm.Modules.Customers.Application.Tests.Validators.UpdateCustomerCommandValidatorTests&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=58c56b00_002Df81e_002D48fd_002Da74f_002Dc8e84271fcf4/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Continuous Testing" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;

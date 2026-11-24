@@ -121,4 +121,43 @@ public class CustomerTests
 
         Assert.Equal(TimeSpan.Zero, customer.CreatedAtUtc.Offset);
     }
+
+    [Fact]
+    public void Update_WithValidDetails_UpdatesCustomer()
+    {
+        // Arrange
+        var customer = Customer.Create(CustomerType.Individual, "John Smith");
+
+        // Act
+        customer.Update(CustomerType.Organisation,
+            "  Example Ltd  ",
+            " contact@example.com ",
+            " 0123456789 ");
+
+        // Assert
+        Assert.Equal(CustomerType.Organisation, customer.CustomerType);
+        Assert.Equal("Example Ltd", customer.Name);
+        Assert.Equal("contact@example.com", customer.Email);
+        Assert.Equal("0123456789", customer.PhoneNumber);
+    }
+
+    [Fact]
+    public void Update_WithEmptyName_ThrowsArgumentException()
+    {
+        // Arrange
+        var customer = Customer.Create(CustomerType.Individual, "John Smith");
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => customer.Update(CustomerType.Individual, ""));
+    }
+
+    [Fact]
+    public void Update_WithInvalidCustomerType_ThrowsArgumentOutOfRangeException()
+    {
+        // Arrange
+        var customer = Customer.Create(CustomerType.Individual, "John Smith");
+
+        // Act & Assert
+        Assert.Throws<ArgumentOutOfRangeException>(() => customer.Update((CustomerType)99, "John Smith"));
+    }
 }
